@@ -1,0 +1,43 @@
+Title: encoding and evolution
+Date: 2024-12-24
+Category: notes
+
+
+Data does not exist in isolation, it is supposed to be read once written. It can be thought of as a message. It can either be read immediately by any other program or stored to be read later. Or it can be just bottled and thrown in a messaging queue to be consumed by a receiver if any.
+
+To do this job effectively, data must be written in such a way that it can be understood by other programs. It could be a server, a web client, or a process within the intra-web of an organization.
+
+Data within the realm of a program is well encapsulated in structures like lists, maps, structs, and classes. But when the data leaves the program it needs to be converted into a form that is easier to store and well understood by other programs. It would not be wise if everyone stored data in their favorite format and left behind a spec for the reader to follow along.
+
+Popular standard encodings that are understood by several language frameworks and their programmers are JSON, XML, and CSV. These are human-readable formats. Out of these only XML and JSON support a schema definition. Applications that don't bother using schema have to hardcode the encoding/decoding steps, making them prone to frequent changes. CSV does not have any schema support, and the rules to write CSVs are fuzzy.
+
+None of these formats are binary formats, so they are not conducive to storage or transferring over the network. Over the years, support has grown for applying binary encoding to these. But none of them are that impressive, since these formats were never built ground up for binary encoding. 
+
+### Thrift and Protocol Buffers
+
+These formats are the next-generation encoding formats, which emerged from the largest tech companies in the 21st Century. They provide a way to specify the schema, and code generation for converting the data into objects as per the schema. They are designed for writing the data eventually as binary. Having a way to define the schema lends to better binary encoding as the attribute name does not need to be repeated and can be just referred to as a location in the predefined schema. 
+
+An advantage of having a schema is that the schema can evolve without any changes in the data. Almost all kinds of changes can be accommodated because, in data, there is a number attached to the field and not its name. The only caveats are cases when there is a datatype change, for example, a 32-bit integer is changed to a 16-bit integer. Or when an optional field becomes a required field. Protocol Buffers have the added advantage that it does not have a special type for array or list structures. It just has a repeated marker set for fields where data can be repeated.
+
+### Avro
+
+Avro as a format is similar to Thrift and ProtoBuff in terms of having a schema and code-gen for interpreting data. The difference with Avro is that it does not care about the order of data. The reason why is that in Avro, one maintains the writer’s schema and the reader’s schema separately. The tooling that does the encoding/decoding makes sure that the correct translation happens even if the two schemas have different orders. This leads to better compaction as in the binary data, there is no longer a need for storing field numbers. Only the type and length of the following data suffices. Avro is more verbose, so if used correctly it can lead to a smoother evolution of the schema. For example, it provides a “union” type where a data type can belong to a set, like {null, string, integer}. The reader can come to know about the writer’s schema in many ways. In a large file, the schema can be written once at the beginning of the file. In a scenario, where multiple files are written with different schema versions, like in the case of a database, each file can refer to a number that specifies the schema version. In a scenario where processes are interacting, like in an RPC-based system, the processes can agree on the version of the schema that they are using respectively. Avro has been designed with a dynamically generated schema as a goal. In Avro, even code generation is optional, as the file will have the schema encapsulated, and a reader can begin to read the data without inferring the schema explicitly. 
+
+The broad argument here is that binary formats backed with schemas are more powerful than human-readable JSON, CSV, and XML.
+
+### Data Flow 
+
+Encoding can be discussed with data flow as a dimension, data flow can be through databases, remote procedure calls, or via message passing. For databases, all of the above discussion apply. They would like to have better compression and support for schema evolution. When writing to lakes or warehouses, for archival or analytics purposes, the encoding scheme must also support column-oriented storage. Column-oriented storage leads to better read performances. 
+
+The RPC family of data flow includes web services and server-to-server communications. In web services, communication is usually between a web client on the browser and a server.
+
+REST remains the best-known set of protocols for writing web services. SOAP has fallen out of favor, but it was an important step in the evolution towards a trend that became popularized as Service Oriented Architecture. RESTful services use JSON-packed data to communicate, SOAP encompasses a fairly complicated set of protocols based on XML.
+
+In the evolution of RPCs, the newest has been gRPC which specifies a protocol buffer-based RPC protocol. Similar protocols exist for Avro and Thrift formats. RPC protocols are better performant and have better semantics than REST. However, REST has a robust set of tooling and frameworks around it that are available in all major languages. It is not a simple problem to keep track of contracts between two processes on different machines. In REST it can be achieved by versioning APIs, while in RPCs the binary encoding format itself offers schema evolvability in design. 
+
+Broadly, one can draw the conclusion that for inter-process communication that is internal to a system, an RPC framework like gRPC is more suited, and for web-based services, REST is more suited. 
+
+Another type of data flow is the asynchronous type, which is based on messaging queue platforms like Kafka or MQs. In these systems, the sender does not expect an immediate response from the receiver about the message being consumed. The sender can remain unknown. Message brokers usually don't enforce an encoding and treat the message like a sequence of bytes. Although platforms like Kafka now also support schema registry. Using an encoding scheme that can support schema evolution can work best in creating robust systems.
+
+Message-passing systems based on brokers are more robust than RPC-based systems as here it can be safely assumed that the receiver might be dead without risking any significant data loss. A distributed actor framework is an abstraction over a broker and actor-based programming model that is powerful for writing concurrent and distributed applications. A famous example is Akka. 
+

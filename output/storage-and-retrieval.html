@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+                        <meta charset="utf-8" />
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                        <meta name="generator" content="Pelican" />
+                        <title>storage and retrieval</title>
+                        <link rel="stylesheet" href="/theme/css/main.css" />
+    <meta name="description" content="Storage Engines This chapter concentrates on storage engines. It addresses the question of how to store data for fast reads and writes. There are..." />
+        </head>
+
+        <body id="index" class="home">
+                <header id="banner" class="body">
+                        <h1><a href="/">blog</a></h1>
+                        <nav><ul>
+                                                <li class="active"><a href="/category/notes.html">notes</a></li>
+                        </ul></nav>
+                </header><!-- /#banner -->
+  <section id="content" class="body">
+    <article>
+      <header>
+        <h1 class="entry-title">
+          <a href="/storage-and-retrieval.html" rel="bookmark"
+             title="Permalink to storage and retrieval">storage and retrieval</a></h1>
+      </header>
+
+      <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2024-12-23T00:00:00+05:30">
+                Published: Mon 23 December 2024
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="/author/anshul.html">anshul</a>
+                </address>
+        <p>In <a href="/category/notes.html">notes</a>.</p>
+        
+</footer><!-- /.post-info -->        <h2>Storage Engines</h2>
+<p>This chapter concentrates on storage engines. It addresses the question of how to store data for fast reads and writes. There are broadly two categories of storage engines. LSM-based and BTree based. LSM-based engines first write the data into memory as an efficient data structure and spill them into disk when the size grows. An implementation of this is done using SSTables. The data structure stored in memory is called the “memtable”, when spilled on disk it is called a segment. A key can exist in multiple segments. This can be thought of as an append-only log. An update operation is another entry into the segment with an existing key. This makes the older entry irrelevant. Compaction can be performed on the segment as an optimization. Segments could vary in size due to compaction and there is no restriction on them being of fixed length.</p>
+<h3>B-tree based implementation</h3>
+<p>A B-tree-based implementation involves writing fixed-length pages of data on the disk. A write/update in B-Tree-based storage engines involves physically updating the disk block associated with the page in which the key lies.</p>
+<h3>Comparison</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>LSM</th>
+<th>B-tree</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Reads</strong></td>
+<td>- Multiple hops from the memtable to the latest segment  <br> - Continues to the last available live segment</td>
+<td>- Based on the key range, locate the right page on the disk <br> - Find the key</td>
+</tr>
+<tr>
+<td><strong>Writes</strong></td>
+<td>- Append to the segment</td>
+<td>- Based on the key range, locate the right page <br> - Insert the given key</td>
+</tr>
+<tr>
+<td><strong>Reliability</strong></td>
+<td>- Uses WAL</td>
+<td>- Also uses WAL</td>
+</tr>
+<tr>
+<td><strong>Compaction</strong></td>
+<td>- Keys may be written multiple times in multiple places <br> - Compaction is necessary, leading to potential disk write bandwidth issues</td>
+<td>- B-tree pages are of fixed sizes, preventing space from being freed even after deletes <br> - Leads to fragmentation, but beneficial in transactional semantics for key latching</td>
+</tr>
+</tbody>
+</table>
+<h2>Discussions on Indexes</h2>
+<h3>Secondary Indexes</h3>
+<p>SSTables and Btrees can be assumed as forms of primary-key indexes, where key-value pairs are being stored.</p>
+<p>Secondary indexes are those where the index is on a non-unique attribute/column. This can be created by extending the idea of primary indexes and adding another field to the column to achieve uniqueness like row number.</p>
+<h3>Storing values within an Index</h3>
+<p>So the index can store key values, the value could be either the actual data, or reference to where the data is stored, or a reference to another key. Postgres uses heap files to store the actual data, and the index references it. In MySQL, the actual data is stored in the data structure itself. Such indexes are called clustered indexes. </p>
+<p>Concatenated indexes are those in which more than one key is stored in the database. Here multiple keys are combined to form a single key.</p>
+<h3>Fuzzy indexes</h3>
+<p>Databases like Lucene use techniques like Levenshtein distance to enable similar key searches and not just exact matches for the key.</p>
+<h3>In Memory Databases</h3>
+<p>With RAM getting cheaper, there have been developments in in-memory databases. Redis can be considered one. Since they do not have to comply with models that are easy to store on disk, they can offer complex data structures to the application.</p>
+<h2>OLTP/OLAP</h2>
+<p>Another way to categorize database systems is based on the use case they cater to. Online transaction processing databases cater to transactional needs like order management, restaurant orders, and similar commercial transactions. </p>
+<p>Usually, when these transactions grow in scale and the organization wants to make sense of them, it no longer remains trivial to query data across many OLTP databases. In large organizations, a data warehouse is adopted. These systems are optimized for the cheap storage cost and write once, read multiple times semantics. Data is loaded into these systems with a process called Extract-Transform-Load. </p>
+<p>Some of the popular OLAPs are SQL-on-Hadoop projects like Presto and spark-SQL</p>
+<p>Schema for OLAPs are different, they are geared towards ease of querying. So these are more denormalized than the OLTP schemas. Like in the star schema, there is a fact table at the center that captures transactional facts like a change in the inventory and some of the columns would refer to their dimensions, for example, fact_inventory would have fields such as seller_id, warehouse_id and there would be dimension tables like dim_sellers and dim_warehouses which would be associated with those fields.</p>
+<h2>Column Oriented Storage</h2>
+<p>In OLAP databases, tables are denormalized to have many (sometimes hundreds or more) columns for ease of querying. This leads to another choice when storing the actual data on disk. If each row has multiple columns, imagine all of them being loaded into memory when a SELECT happens. To optimize this, data is stored in a columnar manner, so only the selected columns are loaded, unless someone runs a SELECT *.</p>
+<p>Another optimization when storing data in a columnar way is compression. Usually, an OLAP table would have a million rows and a few thousand columns in the worst case. However, the unique value for several columns doesn't usually run in the same order as the number of rows. Let's say each column can have “n” unique values. To store this column instead of repeating the column value, a bitmask compression can be used. This column can be stored as n bitmaps. These bitmaps can be thought of as 1xM matrices where M is the number of rows. Wherever a row has a given column value out of the n possibilities, its bitmap can have that row set as 1. </p>
+<p>This can lead to faster reads in queries where OR/AND clauses are used on the value of a bitmask compressed column.</p>
+<p>Another optimization that leads to faster reads is storing the data in sorted order. This also leads to better compression as many repeated values can be compressed using run-length encoding.</p>
+<p>When writing the data into a disk, LSM is better suited for OLAP databases, due to the large volume of data and sorted order. In a BTree implementation, the data would have to be shuffled a lot to maintain the sorted order.</p>
+<p>To optimize query performance for frequent queries, materialized views are a common approach in OLTPs but they make the writes expensive in OLAPs. Materialized views need to be updated each time new writes happen in the table. In OLAPs, something called data cubes is used to precompute aggregates across multiple dimensions. Consider a fact table, which can be aggregated on columns like date, and other keys like product_id.  The result can be stored in a multi-dimensional table called a datacube. </p>
+      </div><!-- /.entry-content -->
+
+    </article>
+  </section>
+                <section id="extras" class="body">
+                                <div class="blogroll">
+                                        <h2>links</h2>
+                                        <ul>
+                                                        <li><a href="https://getpelican.com/">Pelican</a></li>
+                                                        <li><a href="https://www.python.org/">Python.org</a></li>
+                                                        <li><a href="https://palletsprojects.com/p/jinja/">Jinja2</a></li>
+                                                        <li><a href="#">You can modify those links in your config file</a></li>
+                                        </ul>
+                                </div><!-- /.blogroll -->
+                                <div class="social">
+                                        <h2>social</h2>
+                                        <ul>
+
+                                                        <li><a href="#">You can add links in your config file</a></li>
+                                                        <li><a href="#">Another social link</a></li>
+                                        </ul>
+                                </div><!-- /.social -->
+                </section><!-- /#extras -->
+
+                <footer id="contentinfo" class="body">
+                        <address id="about" class="vcard body">
+                                Proudly powered by <a rel="nofollow" href="https://getpelican.com/">Pelican</a>, which takes great advantage of <a rel="nofollow" href="https://www.python.org/">Python</a>.
+                        </address><!-- /#about -->
+
+                        <p>The theme is by <a rel="nofollow" href="https://www.smashingmagazine.com/2009/08/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
+                </footer><!-- /#contentinfo -->
+
+        </body>
+</html>

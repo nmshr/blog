@@ -18,7 +18,109 @@
 
                 <aside id="featured" class="body">
                     <article>
-                        <h1 class="entry-title"><a href="/reliable-maintainable-and-scalable-applications.html">reliable, maintainable, and scalable applications</a></h1>
+                        <h1 class="entry-title"><a href="/replication.html">replication</a></h1>
+<footer class="post-info">
+        <abbr class="published" title="2024-12-26T00:00:00+05:30">
+                Published: Thu 26 December 2024
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="/author/anshul.html">anshul</a>
+                </address>
+        <p>In <a href="/category/notes.html">notes</a>.</p>
+        
+</footer><!-- /.post-info --><p>Why is replication important? In distributed systems, availability is a primary concern. For data to be available to clients, we need redundancy. So if a copy of data is maintained on multiple nodes. More nodes can serve reads if there are failures, or if a single node is not able to handle the load.</p>
+<h2>Leaders and Followers</h2>
+<p>The most common type of replication is the leader-based replication. All writes go via one leader and are copied to replicas. The client connects with the leader for all writes. Reads can happen from other nodes. The data can be made available on replicas either synchronously or asynchronously. In the sync scenario, the writes are committed only when they have been copied to all the replicas. This is not performant, since copying writes to all replicas may take forever. In the async replication, write can be committed as long as the leader sees it. In async replication, durability is traded off for speed. If a new follower joins the cluster, it must get all the writes from the leader. This is achieved by maintaining snapshots of data on the leader. All writes post the snapshot creation need to be synced differently. One way of doing this could be to execute all statements since the snapshot. This is not ideal, since some statements are temporal, like select current_time() etc. Another way of achieving this is to read the database log. This can either be the WAL of the database. But those are binary, so results could differ across nodes. To improve on this, a logical replication log is maintained by databases which is used for replication in case of new nodes joining or handling node failures.</p>
+<h2>Problems with Replication Lag</h2>
+<p>Replication is hard. And doing replication in time is harder. Most databases can only claim, “eventual consistency”. This is a very loosely defined and weak promise. A lot of things can go wrong due to lag in replication. Some of them are well understood and are generally avoided, like Read Your Writes (RYW). In RYW promise, the database makes sure that the user can read their writes. Meaning if the writes are happening via the leader, the database will ensure that reads for that user will happen using only those replicas that are in sync with that user’s writes. Monotonic read is the guarantee, which is weaker than consistency, but stronger than eventual consistency. Here the database will guarantee that if a user has read a certain update in the past, they will continue to read that update. Meaning if there are two replicas, that are not entirely in sync, it won't be the case that the user will do a read from one replica and the next read from the other replica. Another guarantee that can be offered is called Consistent Prefix Reads, it is kind of like Monotonic Reads, but slightly different. If there are two writes w1, and w2 such that w2 can only follow w1, for example, w2 is a user’s response to some user’s question w1 then the person reading should always see w1 followed by w2. Transactions are a way to achieve these guarantees.</p>
+<h2>Multi-Leader Replication</h2>
+<p>Now there are cases when one leader's replication is not enough. Multiple leaders can participate in the cluster. This is especially true in cases where there are many data centers and each data center has its leader. This case is typical in the scenario of disaster recovery protocol. Another use case is a client doing offline writes. For example, a notes app, which only syncs when the device goes online. Here the mobile device and the datacenter where the notes are getting synced can be thought of as two datacenters. Another use case is having users do collaborative editing like in a shared document online. Each of their local copy is essentially a leader in itself which needs to be replicated. Handling conflicts of changes flowing in from multiple leaders is also a challenge in itself. If handled synchronously, it will take forever to resolve and what would the resolution even look like? They need to be resolved asynchronously. Conflict avoidance is a strategy that stops the conflict from happening in the first place. Each user’s update always hits the same data center. This is applicable in the first use case. This breaks down if there is a failure in the user’s data center or the user gets routed to a different data center because of a change in their geolocation. A custom conflict resolution strategy involves passing the responsibility to the application for handling these conflicts. This can be a user-defined function applicable in read or write conflicts depending on the scenario. A multi-leader replication topology can be - circular, start, all to all. The most reliable of these is the all-to-all topology. All other topologies are prone to failure if one leader goes down unexpectedly. </p>
+<h2>Leaderless Replication</h2>
+<p>Another philosophy is to have no leaders while replication happens. Each user can interact with different replicas and as long as the database can promise to be eventually consistent, there is no problem. However, the story is never simple in software and there are many caveats. Dynamo database popularized this philosophy amongst databases. The core idea is to have separate read quorum and write quorum. If there are n nodes and r and w define the read quorum and write quorum, guarantees can be made depending on the relationship between r+w and n. </p>
+<p>Here, “r” is the number of replicas where an update has been replicated to be read, and “w” is the number of replicas where a write has been committed. However, even when r+w &gt; n, there are limitations. Like in the case of sloppy quorum where the set r and the set w are completely disjoint. What happens to concurrent writes? These questions are not answered well so any consistency guarantee needs to be questioned. 
+Concurrent writes are hard to detect. Writes that may not be happening at the same exact time may also be concurrent. Two writes which are not aware of each other may be understood as concurrent. To converge to a consistent state, the database needs to adopt a strategy. A commonly used approach is Last Write Wins, also called LWW. This may provide consistency but can come at the cost of durability. “Happens before relationship” between two write events need to be established, to resolve conflicts or to converge to a consistent state. An algorithm that assigns version numbers to writes can be adopted to achieve this. Version vector is the name of the family of algorithms in use to solve this.</p>                    </article>
+                </aside><!-- /#featured -->
+                    <section id="content" class="body">
+                        <h1>Other articles</h1>
+                        <hr />
+                        <ol id="posts-list" class="hfeed">
+
+                <li><article class="hentry">
+                    <header>
+                        <h1><a href="/encoding-and-evolution.html" rel="bookmark"
+                               title="Permalink to encoding and evolution">encoding and evolution</a></h1>
+                    </header>
+
+                    <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2024-12-24T00:00:00+05:30">
+                Published: Tue 24 December 2024
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="/author/anshul.html">anshul</a>
+                </address>
+        <p>In <a href="/category/notes.html">notes</a>.</p>
+        
+</footer><!-- /.post-info -->                        <p>Data does not exist in isolation, it is supposed to be read once written. It can be thought of as a message. It can either be read immediately by any other program or stored to be read later. Or it can be just bottled and thrown in a messaging queue …</p>
+                        <a class="readmore" href="/encoding-and-evolution.html">read more</a>
+                    </div><!-- /.entry-content -->
+                </article></li>
+
+                <li><article class="hentry">
+                    <header>
+                        <h1><a href="/data-models-and-query-languages.html" rel="bookmark"
+                               title="Permalink to data models and query languages">data models and query languages</a></h1>
+                    </header>
+
+                    <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2024-12-23T00:00:00+05:30">
+                Published: Mon 23 December 2024
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="/author/anshul.html">anshul</a>
+                </address>
+        <p>In <a href="/category/notes.html">notes</a>.</p>
+        
+</footer><!-- /.post-info -->                        <h2>Relational data models</h2>
+<p>Data models are central to what is possible with an application. There are many levels of abstraction at play here. A programmer, developing an application for an end-user will choose a certain type of model that fits the use case—for example, creating classes for real-world entities …</p>
+                        <a class="readmore" href="/data-models-and-query-languages.html">read more</a>
+                    </div><!-- /.entry-content -->
+                </article></li>
+
+                <li><article class="hentry">
+                    <header>
+                        <h1><a href="/storage-and-retrieval.html" rel="bookmark"
+                               title="Permalink to storage and retrieval">storage and retrieval</a></h1>
+                    </header>
+
+                    <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2024-12-23T00:00:00+05:30">
+                Published: Mon 23 December 2024
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="/author/anshul.html">anshul</a>
+                </address>
+        <p>In <a href="/category/notes.html">notes</a>.</p>
+        
+</footer><!-- /.post-info -->                        <h2>Storage Engines</h2>
+<p>This chapter concentrates on storage engines. It addresses the question of how to store data for fast reads and writes. There are broadly two categories of storage engines. LSM-based and BTree based. LSM-based engines first write the data into memory as an efficient data structure and spill them …</p>
+                        <a class="readmore" href="/storage-and-retrieval.html">read more</a>
+                    </div><!-- /.entry-content -->
+                </article></li>
+
+                <li><article class="hentry">
+                    <header>
+                        <h1><a href="/reliable-maintainable-and-scalable-applications.html" rel="bookmark"
+                               title="Permalink to reliable, maintainable, and scalable applications">reliable, maintainable, and scalable applications</a></h1>
+                    </header>
+
+                    <div class="entry-content">
 <footer class="post-info">
         <abbr class="published" title="2024-12-03T00:00:00+05:30">
                 Published: Tue 03 December 2024
@@ -29,31 +131,13 @@
                 </address>
         <p>In <a href="/category/notes.html">notes</a>.</p>
         
-</footer><!-- /.post-info --><h2>Introduction</h2>
-<p>I had always wanted to read Martin Kleppmann’s Designing Data-Intensive Applications, or DDIA as known among developers. I tried to read it many times but never really read it cover to cover. In July 2024, Alex Petrov’s book club voted to pick it as their next reading. Phil Eaton who himself runs a popular book club, which I tried to join but failed, tweeted about it. I could not think of a better way of actually getting to read the book. I also decided to jump-start my blog by writing about the experience. The book club meets weekly to discuss one chapter each week. I thought I’d participate and summarise the chapter and the book club experience in my blog posts. So, here it goes.</p>
-<h3>Chapter 1.</h3>
-<p>The first chapter sets the tone of the book and gives a peek into what follows, without being too technical. It begins by saying that most applications are data intensive. This is fairly true, any production-grade application today needs to span across multiple computers to serve its purpose. Martin describes how applications make use of databases, caches, search indexes, stream, and batch processing constructs. Developers are forced to make many choices between these systems to solve the specialized use cases of their domains. To navigate these choices, the author sets out to establish key important qualities according to him. These values are reliability, maintainability, and scalability.</p>
-<h4>Reliability</h4>
-<p>Reliability is described as the quality where the application must perform predictably within an expected degree of performance even when the conditions are not perfect. Faults and failures are described as inevitable conditions. Failure is defined as the event in which the system halts\ completely and stops working for the user. Fault is when a component deviates from the spec. A system is considered reliable when it can tolerate faults to a sufficient extent. </p>
-<p>Faults can occur due to hardware malfunctions, for example, disk failures which happen often.
-Another example of faults, the book club came up with is CPU heating problems. 
-Software faults are much more common and much harder to find out, this is known to every developer I believe. Here the book club could discuss several incidents caused due to a logical error, the most widespread one has been recently the Crowdstrike incident[1]. Software faults could be due to logical errors, or a program using too many resources in the machine making the overall system function in a degraded manner. Cascading faults cause a chain of events where one fault leads to many other faults. I have personally experienced this a lot in ETL workloads, where one bad event triggers a series of unwanted consequences.</p>
-<p>Another source of faults and failures is human errors, technically even bugs are human errors. Apart from just bugs, oftentimes there are lapses in judgment. Who hasn't heard an incident report that involved an innocent accident where things were deleted or shut down unknowingly? This incident[2] came up in the book club discussions which involved an unsuspecting developer shutting an entire data center down.</p>
-<p>The author then provides a list of tactics that are supposed to make applications reliable.
-These involve finding the right abstractions and interfaces to stop the users from shooting themselves in the foot. Isolating production environments, with different stage setups in place. I have an example to share here from my workplace, where someone published crappy test messages like “hello?” to a production topic causing outages that were complex to recover from. Telemetry, having good management practices, and allowing for easy recovery with checks and balances like CI/CD pipelines are other such recommendations.</p>
-<p>The author makes a great point about reliability not only being a requirement for mission-critical systems like a nuclear launcher, a simple tool like an online journal which a young adolescent might be using to note down their thoughts, is expected to not break because for them the journal might be their life’s work. If this example is not relatable for you, you are free to make up your own.</p>
-<h4>Scalability</h4>
-<p>The chapter then discusses another key tenet of data systems, scalability. It is defined to be a system’s ability to cope with increased load. Load is measured by requests per unit of time, to which an application is subjected. This could be due to an increase in the number of users or an increase in the volume of data being processed at any given time. The numbers which describe load are called load parameters and they differ according to the application. It can range from the number of concurrent users to the bit rate on a cache. Making an application scalable, involves making the right architectural choice, the author explains this by giving the Twitter example.</p>
-<p>Load parameters work in tandem with a measure of performance, meaning that any change in load parameters is usually reflected in the application’s performance, which is measured by metrics like throughput or response time. Latency and response time are similar sounding metrics but according to Martin, latency is the portion of the response time where the request is just waiting in a queue.</p>
-<p>A metric that has become important over the years is tail latency. The term tail latency can be understood simply from the distribution of response times v/s number of requests. Tail latencies are important as they have a compounding effect and they usually are caused by requests which add a lot of value. For example, the query on an OLAP spans across multiple years to populate the landing page of a dashboard.</p>
-<p>Vertical and horizontal scaling are the two most classic ways of handling scale. Horizontal scaling gained a lot of popularity considered to be the cheaper alternative. In practice, a mix of both approaches work together. A smaller team would want to host their application on a lesser number of instances even if it means provisioning larger machines.</p>
-<h4>Maintainability</h4>
-<p>The next concern addressed is maintainability. This is commonly understood as how easy is to keep the lights on. This is further broken into three qualities of a maintainable system, operability, evolvability, and simplicity. Each of them is pretty self-explanatory. Most experienced developers would appreciate this. It’s not just good to have quality. It leads to make-or-break situations in software systems.</p>
-<p>This chapter lays out the goals a data-intensive application sets out to achieve. The next chapters will cover how applications achieve them.</p>
-<h4>References</h4>
-<p>[1] <a href="tab:https://www.crowdstrike.com/blog/falcon-content-update-preliminary-post-incident-report/">https://www.crowdstrike.com/blog/falcon-content-update-preliminary-post-incident-report/</a></p>
-<p>[2] <a href="tab:https://www.youtube.com/watch?v=sdDEwqUnOfs">https://www.youtube.com/watch?v=sdDEwqUnOfs</a></p>                    </article>
-                </aside><!-- /#featured -->
+</footer><!-- /.post-info -->                        <h2>Introduction</h2>
+<p>I had always wanted to read Martin Kleppmann’s Designing Data-Intensive Applications, or DDIA as known among developers. I tried to read it many times but never really read it cover to cover. In July 2024, Alex Petrov’s book club voted to pick it as their next reading …</p>
+                        <a class="readmore" href="/reliable-maintainable-and-scalable-applications.html">read more</a>
+                    </div><!-- /.entry-content -->
+                </article></li>
+                    </ol><!-- /#posts-list -->
+                    </section><!-- /#content -->
                 <section id="extras" class="body">
                                 <div class="blogroll">
                                         <h2>links</h2>
