@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+                        <meta charset="utf-8" />
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                        <meta name="generator" content="Pelican" />
+                        <title>blog - anshul</title>
+                        <link rel="stylesheet" href="/theme/css/main.css" />
+        </head>
+
+        <body id="index" class="home">
+                <header id="banner" class="body">
+                        <h1><a href="/">blog</a></h1>
+                        <nav><ul>
+                                                <li><a href="/category/notes.html">notes</a></li>
+                        </ul></nav>
+                </header><!-- /#banner -->
+
+                <aside id="featured" class="body">
+                    <article>
+                        <h1 class="entry-title"><a href="/replication.html">replication</a></h1>
+<footer class="post-info">
+        <abbr class="published" title="2024-12-26T00:00:00+05:30">
+                Published: Thu 26 December 2024
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="/author/anshul.html">anshul</a>
+                </address>
+        <p>In <a href="/category/notes.html">notes</a>.</p>
+        
+</footer><!-- /.post-info --><p>Why is replication important? In distributed systems, availability is a primary concern. For data to be available to clients, we need redundancy. So if a copy of data is maintained on multiple nodes. More nodes can serve reads if there are failures, or if a single node is not able to handle the load.</p>
+<h2>Leaders and Followers</h2>
+<p>The most common type of replication is the leader-based replication. All writes go via one leader and are copied to replicas. The client connects with the leader for all writes. Reads can happen from other nodes. The data can be made available on replicas either synchronously or asynchronously. In the sync scenario, the writes are committed only when they have been copied to all the replicas. This is not performant, since copying writes to all replicas may take forever. In the async replication, write can be committed as long as the leader sees it. In async replication, durability is traded off for speed. If a new follower joins the cluster, it must get all the writes from the leader. This is achieved by maintaining snapshots of data on the leader. All writes post the snapshot creation need to be synced differently. One way of doing this could be to execute all statements since the snapshot. This is not ideal, since some statements are temporal, like select current_time() etc. Another way of achieving this is to read the database log. This can either be the WAL of the database. But those are binary, so results could differ across nodes. To improve on this, a logical replication log is maintained by databases which is used for replication in case of new nodes joining or handling node failures.</p>
+<h2>Problems with Replication Lag</h2>
+<p>Replication is hard. And doing replication in time is harder. Most databases can only claim, “eventual consistency”. This is a very loosely defined and weak promise. A lot of things can go wrong due to lag in replication. Some of them are well understood and are generally avoided, like Read Your Writes (RYW). In RYW promise, the database makes sure that the user can read their writes. Meaning if the writes are happening via the leader, the database will ensure that reads for that user will happen using only those replicas that are in sync with that user’s writes. Monotonic read is the guarantee, which is weaker than consistency, but stronger than eventual consistency. Here the database will guarantee that if a user has read a certain update in the past, they will continue to read that update. Meaning if there are two replicas, that are not entirely in sync, it won't be the case that the user will do a read from one replica and the next read from the other replica. Another guarantee that can be offered is called Consistent Prefix Reads, it is kind of like Monotonic Reads, but slightly different. If there are two writes w1, and w2 such that w2 can only follow w1, for example, w2 is a user’s response to some user’s question w1 then the person reading should always see w1 followed by w2. Transactions are a way to achieve these guarantees.</p>
+<h2>Multi-Leader Replication</h2>
+<p>Now there are cases when one leader's replication is not enough. Multiple leaders can participate in the cluster. This is especially true in cases where there are many data centers and each data center has its leader. This case is typical in the scenario of disaster recovery protocol. Another use case is a client doing offline writes. For example, a notes app, which only syncs when the device goes online. Here the mobile device and the datacenter where the notes are getting synced can be thought of as two datacenters. Another use case is having users do collaborative editing like in a shared document online. Each of their local copy is essentially a leader in itself which needs to be replicated. Handling conflicts of changes flowing in from multiple leaders is also a challenge in itself. If handled synchronously, it will take forever to resolve and what would the resolution even look like? They need to be resolved asynchronously. Conflict avoidance is a strategy that stops the conflict from happening in the first place. Each user’s update always hits the same data center. This is applicable in the first use case. This breaks down if there is a failure in the user’s data center or the user gets routed to a different data center because of a change in their geolocation. A custom conflict resolution strategy involves passing the responsibility to the application for handling these conflicts. This can be a user-defined function applicable in read or write conflicts depending on the scenario. A multi-leader replication topology can be - circular, start, all to all. The most reliable of these is the all-to-all topology. All other topologies are prone to failure if one leader goes down unexpectedly. </p>
+<h2>Leaderless Replication</h2>
+<p>Another philosophy is to have no leaders while replication happens. Each user can interact with different replicas and as long as the database can promise to be eventually consistent, there is no problem. However, the story is never simple in software and there are many caveats. Dynamo database popularized this philosophy amongst databases. The core idea is to have separate read quorum and write quorum. If there are n nodes and r and w define the read quorum and write quorum, guarantees can be made depending on the relationship between r+w and n. </p>
+<p>Here, “r” is the number of replicas where an update has been replicated to be read, and “w” is the number of replicas where a write has been committed. However, even when r+w &gt; n, there are limitations. Like in the case of sloppy quorum where the set r and the set w are completely disjoint. What happens to concurrent writes? These questions are not answered well so any consistency guarantee needs to be questioned. 
+Concurrent writes are hard to detect. Writes that may not be happening at the same exact time may also be concurrent. Two writes which are not aware of each other may be understood as concurrent. To converge to a consistent state, the database needs to adopt a strategy. A commonly used approach is Last Write Wins, also called LWW. This may provide consistency but can come at the cost of durability. “Happens before relationship” between two write events need to be established, to resolve conflicts or to converge to a consistent state. An algorithm that assigns version numbers to writes can be adopted to achieve this. Version vector is the name of the family of algorithms in use to solve this.</p>                    </article>
+                </aside><!-- /#featured -->
+                    <section id="content" class="body">
+                        <h1>Other articles</h1>
+                        <hr />
+                        <ol id="posts-list" class="hfeed">
+
+                <li><article class="hentry">
+                    <header>
+                        <h1><a href="/encoding-and-evolution.html" rel="bookmark"
+                               title="Permalink to encoding and evolution">encoding and evolution</a></h1>
+                    </header>
+
+                    <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2024-12-24T00:00:00+05:30">
+                Published: Tue 24 December 2024
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="/author/anshul.html">anshul</a>
+                </address>
+        <p>In <a href="/category/notes.html">notes</a>.</p>
+        
+</footer><!-- /.post-info -->                        <p>Data does not exist in isolation, it is supposed to be read once written. It can be thought of as a message. It can either be read immediately by any other program or stored to be read later. Or it can be just bottled and thrown in a messaging queue …</p>
+                        <a class="readmore" href="/encoding-and-evolution.html">read more</a>
+                    </div><!-- /.entry-content -->
+                </article></li>
+
+                <li><article class="hentry">
+                    <header>
+                        <h1><a href="/data-models-and-query-languages.html" rel="bookmark"
+                               title="Permalink to data models and query languages">data models and query languages</a></h1>
+                    </header>
+
+                    <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2024-12-23T00:00:00+05:30">
+                Published: Mon 23 December 2024
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="/author/anshul.html">anshul</a>
+                </address>
+        <p>In <a href="/category/notes.html">notes</a>.</p>
+        
+</footer><!-- /.post-info -->                        <h2>Relational data models</h2>
+<p>Data models are central to what is possible with an application. There are many levels of abstraction at play here. A programmer, developing an application for an end-user will choose a certain type of model that fits the use case—for example, creating classes for real-world entities …</p>
+                        <a class="readmore" href="/data-models-and-query-languages.html">read more</a>
+                    </div><!-- /.entry-content -->
+                </article></li>
+
+                <li><article class="hentry">
+                    <header>
+                        <h1><a href="/storage-and-retrieval.html" rel="bookmark"
+                               title="Permalink to storage and retrieval">storage and retrieval</a></h1>
+                    </header>
+
+                    <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2024-12-23T00:00:00+05:30">
+                Published: Mon 23 December 2024
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="/author/anshul.html">anshul</a>
+                </address>
+        <p>In <a href="/category/notes.html">notes</a>.</p>
+        
+</footer><!-- /.post-info -->                        <h2>Storage Engines</h2>
+<p>This chapter concentrates on storage engines. It addresses the question of how to store data for fast reads and writes. There are broadly two categories of storage engines. LSM-based and BTree based. LSM-based engines first write the data into memory as an efficient data structure and spill them …</p>
+                        <a class="readmore" href="/storage-and-retrieval.html">read more</a>
+                    </div><!-- /.entry-content -->
+                </article></li>
+
+                <li><article class="hentry">
+                    <header>
+                        <h1><a href="/reliable-maintainable-and-scalable-applications.html" rel="bookmark"
+                               title="Permalink to reliable, maintainable, and scalable applications">reliable, maintainable, and scalable applications</a></h1>
+                    </header>
+
+                    <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2024-12-03T00:00:00+05:30">
+                Published: Tue 03 December 2024
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="/author/anshul.html">anshul</a>
+                </address>
+        <p>In <a href="/category/notes.html">notes</a>.</p>
+        
+</footer><!-- /.post-info -->                        <h2>Introduction</h2>
+<p>I had always wanted to read Martin Kleppmann’s Designing Data-Intensive Applications, or DDIA as known among developers. I tried to read it many times but never really read it cover to cover. In July 2024, Alex Petrov’s book club voted to pick it as their next reading …</p>
+                        <a class="readmore" href="/reliable-maintainable-and-scalable-applications.html">read more</a>
+                    </div><!-- /.entry-content -->
+                </article></li>
+                    </ol><!-- /#posts-list -->
+                    </section><!-- /#content -->
+                <section id="extras" class="body">
+                                <div class="blogroll">
+                                        <h2>links</h2>
+                                        <ul>
+                                                        <li><a href="https://getpelican.com/">Pelican</a></li>
+                                                        <li><a href="https://www.python.org/">Python.org</a></li>
+                                                        <li><a href="https://palletsprojects.com/p/jinja/">Jinja2</a></li>
+                                                        <li><a href="#">You can modify those links in your config file</a></li>
+                                        </ul>
+                                </div><!-- /.blogroll -->
+                                <div class="social">
+                                        <h2>social</h2>
+                                        <ul>
+
+                                                        <li><a href="#">You can add links in your config file</a></li>
+                                                        <li><a href="#">Another social link</a></li>
+                                        </ul>
+                                </div><!-- /.social -->
+                </section><!-- /#extras -->
+
+                <footer id="contentinfo" class="body">
+                        <address id="about" class="vcard body">
+                                Proudly powered by <a rel="nofollow" href="https://getpelican.com/">Pelican</a>, which takes great advantage of <a rel="nofollow" href="https://www.python.org/">Python</a>.
+                        </address><!-- /#about -->
+
+                        <p>The theme is by <a rel="nofollow" href="https://www.smashingmagazine.com/2009/08/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
+                </footer><!-- /#contentinfo -->
+
+        </body>
+</html>
