@@ -1,6 +1,6 @@
 AUTHOR = 'anshul'
 SITENAME = 'blog'
-SITEURL = ""
+SITEURL = "https://nmshr.github.io/blog"
 
 PATH = "content"
 

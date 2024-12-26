@@ -5,22 +5,22 @@
                         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                         <meta name="generator" content="Pelican" />
                         <title>storage and retrieval</title>
-                        <link rel="stylesheet" href="/theme/css/main.css" />
+                        <link rel="stylesheet" href="https://nmshr.github.io/blog/theme/css/main.css" />
     <meta name="description" content="Storage Engines This chapter concentrates on storage engines. It addresses the question of how to store data for fast reads and writes. There are..." />
         </head>
 
         <body id="index" class="home">
                 <header id="banner" class="body">
-                        <h1><a href="/">blog</a></h1>
+                        <h1><a href="https://nmshr.github.io/blog/">blog</a></h1>
                         <nav><ul>
-                                                <li class="active"><a href="/category/notes.html">notes</a></li>
+                                                <li class="active"><a href="https://nmshr.github.io/blog/category/notes.html">notes</a></li>
                         </ul></nav>
                 </header><!-- /#banner -->
   <section id="content" class="body">
     <article>
       <header>
         <h1 class="entry-title">
-          <a href="/storage-and-retrieval.html" rel="bookmark"
+          <a href="https://nmshr.github.io/blog/storage-and-retrieval.html" rel="bookmark"
              title="Permalink to storage and retrieval">storage and retrieval</a></h1>
       </header>
 
@@ -31,9 +31,9 @@
         </abbr>
 
                 <address class="vcard author">
-                        By                                 <a class="url fn" href="/author/anshul.html">anshul</a>
+                        By                                 <a class="url fn" href="https://nmshr.github.io/blog/author/anshul.html">anshul</a>
                 </address>
-        <p>In <a href="/category/notes.html">notes</a>.</p>
+        <p>In <a href="https://nmshr.github.io/blog/category/notes.html">notes</a>.</p>
         
 </footer><!-- /.post-info -->        <h2>Storage Engines</h2>
 <p>This chapter concentrates on storage engines. It addresses the question of how to store data for fast reads and writes. There are broadly two categories of storage engines. LSM-based and BTree based. LSM-based engines first write the data into memory as an efficient data structure and spill them into disk when the size grows. An implementation of this is done using SSTables. The data structure stored in memory is called the “memtable”, when spilled on disk it is called a segment. A key can exist in multiple segments. This can be thought of as an append-only log. An update operation is another entry into the segment with an existing key. This makes the older entry irrelevant. Compaction can be performed on the segment as an optimization. Segments could vary in size due to compaction and there is no restriction on them being of fixed length.</p>
