@@ -1,3 +1,12 @@
+/*
+	Name: Smashing HTML5
+	Date: July 2009
+	Description: Sample layout for HTML5 and CSS3 goodness.
+	Version: 1.0
+	License: MIT <https://opensource.org/licenses/MIT>
+	Licensed by: Smashing Media GmbH <https://www.smashingmagazine.com/>
+	Original author: Enrique Ramírez <http://enrique-ramirez.com/>
+*/
 
 /* Imports */
 @import url("reset.css");
@@ -5,59 +14,10 @@
 @import url("typogrify.css");
 @import url("fonts.css");
 
-/* constants */
-:root {
-    /* --background-color: #1492c4; */
-    --text-color: #000305;
-    --heading-color: #000305;
-    --primary-color: #C74350;
-    --secondary-color: #333;
-    --link-hover-bg: #C74350;
-    --link-hover-text: #fff;
-    --hr-color: #eeeeee;
-
-    /* Heading Background Colors */
-    --h1-bg: #e50a0a;
-    --h2-bg: #ffffff;
-    --h3-bg: #ffffff;
-    --h4-bg: #ffffff;
-    --h5-bg: #ffffff;
-    --h6-bg: #ffffff;
-
-    /* Featured Section */
-    --featured-bg: #fff;
-
-    /* About Section */
-    --about-bg: #fff;
-
-    /* Comments */
-    --comment-bg: #f8f8f8;
-    --comment-alt-bg: #f5f5f5;
-
-    /* Navigation */
-    --nav-bg: #000305;
-    --nav-link-hover-bg: #C74451;
-
-    /* Banner */
-    --banner-link-color: #000305;
-    --banner-link-hover-color: #C74350;
-    
-
-    /* Borders */
-    --figure-border: #eee;
-    
-    /* Colors for debugging */
-    --banner-background-color : #f5f4ef;
-
 /***** Global *****/
 /* Body */
 body {
-    /* background: #f5f4ef; */
-    /* background: #ddf2fa; */
-
-    background: #ffffff;
-
-
+    background: #F5F4EF;
     color: #000305;
     font-size: 87.5%; /* Base font size: 14px */
     font-family: 'Trebuchet MS', Trebuchet, 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
@@ -68,14 +28,12 @@ body {
 }
 
 /* Headings */
-h1 {font-size: 2em     ; background: var(--h1-bg); }
-h2 {font-size: 1.571em ; background: var(--h2-bg); }	/* 22px */
-h3 {font-size: 1.429em ; background: var(--h3-bg); }	/* 20px */
-h4 {font-size: 1.286em ; background: var(--h4-bg);}	/* 18px */
-h5 {font-size: 1.143em ; background: var(--h5-bg);}	/* 16px */
-h6 {font-size: 1em     ; background: var(--h6-bg);}		/* 14px */
-
-
+h1 {font-size: 2em }
+h2 {font-size: 1.571em}	/* 22px */
+h3 {font-size: 1.429em}	/* 20px */
+h4 {font-size: 1.286em}	/* 18px */
+h5 {font-size: 1.143em}	/* 16px */
+h6 {font-size: 1em}		/* 14px */
 
 h1, h2, h3, h4, h5, h6 {
     font-weight: 400;
@@ -215,8 +173,6 @@ div.figure p.caption, figure p.caption { /* margin provided by figure */
 #banner {
     margin: 0 auto;
     padding: 0.8em 0 0 0;
-    /*background-color: #f5f4ef;*/
-    background-color: var(--banner-background-color);
 }
 
 	/* Banner */
@@ -481,4 +437,3 @@ li:first-child .hentry, #content > .hentry {border: 0; margin: 0;}
 
 #add-comment input[type='submit'] {float: right; margin: 0 .5em;}
 #add-comment * {margin-bottom: .5em;}
-

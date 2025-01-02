@@ -1,41 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
-        <head>
-                        <meta charset="utf-8" />
-                        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-                        <meta name="generator" content="Pelican" />
-                        <title>storage and retrieval</title>
-                        <link rel="stylesheet" href="https://nmshr.github.io/blog/theme/css/main.css" />
-    <meta name="description" content="Storage Engines This chapter concentrates on storage engines. It addresses the question of how to store data for fast reads and writes. There are..." />
-        </head>
+  <head>
+        <title>blog - storage and retrieval</title>
+      <meta charset="utf-8" />
+      <meta name="generator" content="Pelican" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="/theme/css/main.css" />
 
-        <body id="index" class="home">
-                <header id="banner" class="body">
-                        <h1><a href="https://nmshr.github.io/blog/">blog</a></h1>
-                        <nav><ul>
-                                                <li class="active"><a href="https://nmshr.github.io/blog/category/notes.html">notes</a></li>
-                        </ul></nav>
-                </header><!-- /#banner -->
+
+
+
+
+  </head>
+
+  <body id="index" class="home">
+    <header id="banner" class="body">
+      <hgroup><h1><a href="/">blog</a></h1></hgroup>
+      <nav><ul>
+            <li><a href="/category/notes.html"  aria-current="page" >notes</a></li>
+            <li><a href="/category/posts.html" >posts</a></li>
+      </ul></nav>
+    </header>
+    <main>
   <section id="content" class="body">
+
     <article>
       <header>
-        <h1 class="entry-title">
-          <a href="https://nmshr.github.io/blog/storage-and-retrieval.html" rel="bookmark"
-             title="Permalink to storage and retrieval">storage and retrieval</a></h1>
-      </header>
-
-      <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2024-12-23T00:00:00+05:30">
-                Published: Mon 23 December 2024
-        </abbr>
-
-                <address class="vcard author">
-                        By                                 <a class="url fn" href="https://nmshr.github.io/blog/author/anshul.html">anshul</a>
-                </address>
-        <p>In <a href="https://nmshr.github.io/blog/category/notes.html">notes</a>.</p>
+        <h2>storage and retrieval</h2>
         
-</footer><!-- /.post-info -->        <h2>Storage Engines</h2>
+      </header>
+      <h2>Storage Engines</h2>
 <p>This chapter concentrates on storage engines. It addresses the question of how to store data for fast reads and writes. There are broadly two categories of storage engines. LSM-based and BTree based. LSM-based engines first write the data into memory as an efficient data structure and spill them into disk when the size grows. An implementation of this is done using SSTables. The data structure stored in memory is called the “memtable”, when spilled on disk it is called a segment. A key can exist in multiple segments. This can be thought of as an append-only log. An update operation is another entry into the segment with an existing key. This makes the older entry irrelevant. Compaction can be performed on the segment as an optimization. Segments could vary in size due to compaction and there is no restriction on them being of fixed length.</p>
 <h3>B-tree based implementation</h3>
 <p>A B-tree-based implementation involves writing fixed-length pages of data on the disk. A write/update in B-Tree-based storage engines involves physically updating the disk block associated with the page in which the key lies.</p>
@@ -94,37 +88,22 @@
 <p>Another optimization that leads to faster reads is storing the data in sorted order. This also leads to better compression as many repeated values can be compressed using run-length encoding.</p>
 <p>When writing the data into a disk, LSM is better suited for OLAP databases, due to the large volume of data and sorted order. In a BTree implementation, the data would have to be shuffled a lot to maintain the sorted order.</p>
 <p>To optimize query performance for frequent queries, materialized views are a common approach in OLTPs but they make the writes expensive in OLAPs. Materialized views need to be updated each time new writes happen in the table. In OLAPs, something called data cubes is used to precompute aggregates across multiple dimensions. Consider a fact table, which can be aggregated on columns like date, and other keys like product_id.  The result can be stored in a multi-dimensional table called a datacube. </p>
-      </div><!-- /.entry-content -->
-
+      <footer>
+        <p>Published: <time datetime="2024-12-23T00:00:00+05:30">
+          Mon 23 December 2024
+        </time></p>
+          <p>
+            Category: <a href="/category/notes.html">notes</a>
+          </p>
+      </footer>
     </article>
-  </section>
-                <section id="extras" class="body">
-                                <div class="blogroll">
-                                        <h2>links</h2>
-                                        <ul>
-                                                        <li><a href="https://getpelican.com/">Pelican</a></li>
-                                                        <li><a href="https://www.python.org/">Python.org</a></li>
-                                                        <li><a href="https://palletsprojects.com/p/jinja/">Jinja2</a></li>
-                                                        <li><a href="#">You can modify those links in your config file</a></li>
-                                        </ul>
-                                </div><!-- /.blogroll -->
-                                <div class="social">
-                                        <h2>social</h2>
-                                        <ul>
-
-                                                        <li><a href="#">You can add links in your config file</a></li>
-                                                        <li><a href="#">Another social link</a></li>
-                                        </ul>
-                                </div><!-- /.social -->
-                </section><!-- /#extras -->
-
-                <footer id="contentinfo" class="body">
-                        <address id="about" class="vcard body">
-                                Proudly powered by <a rel="nofollow" href="https://getpelican.com/">Pelican</a>, which takes great advantage of <a rel="nofollow" href="https://www.python.org/">Python</a>.
-                        </address><!-- /#about -->
-
-                        <p>The theme is by <a rel="nofollow" href="https://www.smashingmagazine.com/2009/08/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
-                </footer><!-- /#contentinfo -->
-
-        </body>
+    </sections>
+    </main>
+    <footer id="contentinfo" class="body">
+      <address  id="about" class="vcard body">
+        Powered by <a rel="nofollow" href="https://getpelican.com/">Pelican</a>,
+        which takes great advantage of <a rel="nofollow" href="https://www.python.org/">Python</a>.
+      </address>
+    </footer>
+  </body>
 </html>

@@ -1,41 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
-        <head>
-                        <meta charset="utf-8" />
-                        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-                        <meta name="generator" content="Pelican" />
-                        <title>encoding and evolution</title>
-                        <link rel="stylesheet" href="https://nmshr.github.io/blog/theme/css/main.css" />
-    <meta name="description" content="Data does not exist in isolation, it is supposed to be read once written. It can be thought of as a message. It can either be read immediately by..." />
-        </head>
+  <head>
+        <title>blog - encoding and evolution</title>
+      <meta charset="utf-8" />
+      <meta name="generator" content="Pelican" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="/theme/css/main.css" />
 
-        <body id="index" class="home">
-                <header id="banner" class="body">
-                        <h1><a href="https://nmshr.github.io/blog/">blog</a></h1>
-                        <nav><ul>
-                                                <li class="active"><a href="https://nmshr.github.io/blog/category/notes.html">notes</a></li>
-                        </ul></nav>
-                </header><!-- /#banner -->
+
+
+
+
+  </head>
+
+  <body id="index" class="home">
+    <header id="banner" class="body">
+      <hgroup><h1><a href="/">blog</a></h1></hgroup>
+      <nav><ul>
+            <li><a href="/category/notes.html"  aria-current="page" >notes</a></li>
+            <li><a href="/category/posts.html" >posts</a></li>
+      </ul></nav>
+    </header>
+    <main>
   <section id="content" class="body">
+
     <article>
       <header>
-        <h1 class="entry-title">
-          <a href="https://nmshr.github.io/blog/encoding-and-evolution.html" rel="bookmark"
-             title="Permalink to encoding and evolution">encoding and evolution</a></h1>
-      </header>
-
-      <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2024-12-24T00:00:00+05:30">
-                Published: Tue 24 December 2024
-        </abbr>
-
-                <address class="vcard author">
-                        By                                 <a class="url fn" href="https://nmshr.github.io/blog/author/anshul.html">anshul</a>
-                </address>
-        <p>In <a href="https://nmshr.github.io/blog/category/notes.html">notes</a>.</p>
+        <h2>encoding and evolution</h2>
         
-</footer><!-- /.post-info -->        <p>Data does not exist in isolation, it is supposed to be read once written. It can be thought of as a message. It can either be read immediately by any other program or stored to be read later. Or it can be just bottled and thrown in a messaging queue to be consumed by a receiver if any.</p>
+      </header>
+      <p>Data does not exist in isolation, it is supposed to be read once written. It can be thought of as a message. It can either be read immediately by any other program or stored to be read later. Or it can be just bottled and thrown in a messaging queue to be consumed by a receiver if any.</p>
 <p>To do this job effectively, data must be written in such a way that it can be understood by other programs. It could be a server, a web client, or a process within the intra-web of an organization.</p>
 <p>Data within the realm of a program is well encapsulated in structures like lists, maps, structs, and classes. But when the data leaves the program it needs to be converted into a form that is easier to store and well understood by other programs. It would not be wise if everyone stored data in their favorite format and left behind a spec for the reader to follow along.</p>
 <p>Popular standard encodings that are understood by several language frameworks and their programmers are JSON, XML, and CSV. These are human-readable formats. Out of these only XML and JSON support a schema definition. Applications that don't bother using schema have to hardcode the encoding/decoding steps, making them prone to frequent changes. CSV does not have any schema support, and the rules to write CSVs are fuzzy.</p>
@@ -54,37 +48,22 @@
 <p>Broadly, one can draw the conclusion that for inter-process communication that is internal to a system, an RPC framework like gRPC is more suited, and for web-based services, REST is more suited. </p>
 <p>Another type of data flow is the asynchronous type, which is based on messaging queue platforms like Kafka or MQs. In these systems, the sender does not expect an immediate response from the receiver about the message being consumed. The sender can remain unknown. Message brokers usually don't enforce an encoding and treat the message like a sequence of bytes. Although platforms like Kafka now also support schema registry. Using an encoding scheme that can support schema evolution can work best in creating robust systems.</p>
 <p>Message-passing systems based on brokers are more robust than RPC-based systems as here it can be safely assumed that the receiver might be dead without risking any significant data loss. A distributed actor framework is an abstraction over a broker and actor-based programming model that is powerful for writing concurrent and distributed applications. A famous example is Akka. </p>
-      </div><!-- /.entry-content -->
-
+      <footer>
+        <p>Published: <time datetime="2024-12-24T00:00:00+05:30">
+          Tue 24 December 2024
+        </time></p>
+          <p>
+            Category: <a href="/category/notes.html">notes</a>
+          </p>
+      </footer>
     </article>
-  </section>
-                <section id="extras" class="body">
-                                <div class="blogroll">
-                                        <h2>links</h2>
-                                        <ul>
-                                                        <li><a href="https://getpelican.com/">Pelican</a></li>
-                                                        <li><a href="https://www.python.org/">Python.org</a></li>
-                                                        <li><a href="https://palletsprojects.com/p/jinja/">Jinja2</a></li>
-                                                        <li><a href="#">You can modify those links in your config file</a></li>
-                                        </ul>
-                                </div><!-- /.blogroll -->
-                                <div class="social">
-                                        <h2>social</h2>
-                                        <ul>
-
-                                                        <li><a href="#">You can add links in your config file</a></li>
-                                                        <li><a href="#">Another social link</a></li>
-                                        </ul>
-                                </div><!-- /.social -->
-                </section><!-- /#extras -->
-
-                <footer id="contentinfo" class="body">
-                        <address id="about" class="vcard body">
-                                Proudly powered by <a rel="nofollow" href="https://getpelican.com/">Pelican</a>, which takes great advantage of <a rel="nofollow" href="https://www.python.org/">Python</a>.
-                        </address><!-- /#about -->
-
-                        <p>The theme is by <a rel="nofollow" href="https://www.smashingmagazine.com/2009/08/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
-                </footer><!-- /#contentinfo -->
-
-        </body>
+    </sections>
+    </main>
+    <footer id="contentinfo" class="body">
+      <address  id="about" class="vcard body">
+        Powered by <a rel="nofollow" href="https://getpelican.com/">Pelican</a>,
+        which takes great advantage of <a rel="nofollow" href="https://www.python.org/">Python</a>.
+      </address>
+    </footer>
+  </body>
 </html>
