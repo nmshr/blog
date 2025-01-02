@@ -1,6 +1,7 @@
 Title: storage and retrieval
 Date: 2024-12-23
 Category: notes
+Status: hidden
 
 ## Storage Engines
 

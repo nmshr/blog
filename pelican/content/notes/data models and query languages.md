@@ -1,6 +1,7 @@
 Title: data models and query languages
 Date: 2024-12-23
 Category: notes
+Status: hidden
 
 ## Relational data models
 

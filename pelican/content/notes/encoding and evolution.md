@@ -1,6 +1,7 @@
 Title: encoding and evolution
 Date: 2024-12-24
 Category: notes
+Status: hidden
 
 
 Data does not exist in isolation, it is supposed to be read once written. It can be thought of as a message. It can either be read immediately by any other program or stored to be read later. Or it can be just bottled and thrown in a messaging queue to be consumed by a receiver if any.
