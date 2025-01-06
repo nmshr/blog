@@ -1,41 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
-        <head>
-                        <meta charset="utf-8" />
-                        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-                        <meta name="generator" content="Pelican" />
-                        <title>replication</title>
-                        <link rel="stylesheet" href="/theme/css/main.css" />
-    <meta name="description" content="Why is replication important? In distributed systems, availability is a primary concern. For data to be available to clients, we need redundancy...." />
-        </head>
+  <head>
+        <title>blog - replication</title>
+      <meta charset="utf-8" />
+      <meta name="generator" content="Pelican" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        <body id="index" class="home">
-                <header id="banner" class="body">
-                        <h1><a href="/">blog</a></h1>
-                        <nav><ul>
-                                                <li class="active"><a href="/category/notes.html">notes</a></li>
-                        </ul></nav>
-                </header><!-- /#banner -->
-  <section id="content" class="body">
-    <article>
-      <header>
-        <h1 class="entry-title">
-          <a href="/replication.html" rel="bookmark"
-             title="Permalink to replication">replication</a></h1>
-      </header>
 
-      <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2024-12-26T00:00:00+05:30">
-                Published: Thu 26 December 2024
-        </abbr>
 
-                <address class="vcard author">
-                        By                                 <a class="url fn" href="/author/anshul.html">anshul</a>
-                </address>
-        <p>In <a href="/category/notes.html">notes</a>.</p>
-        
-</footer><!-- /.post-info -->        <p>Why is replication important? In distributed systems, availability is a primary concern. For data to be available to clients, we need redundancy. So if a copy of data is maintained on multiple nodes. More nodes can serve reads if there are failures, or if a single node is not able to handle the load.</p>
+
+
+  </head>
+
+  <body>
+    <header>
+      <hgroup><h1><a href="localhost/">blog</a></h1></hgroup>
+      <nav><ul>
+            <li><a href="localhost/category/notes.html"  aria-current="page" >notes</a></li>
+            <li><a href="localhost/category/posts.html" >posts</a></li>
+      </ul></nav>
+    </header>
+    <main>
+  <article>
+    <header>
+      <h2>
+        <a href="localhost/replication.html" rel="bookmark"
+           title="Permalink to replication">replication</a></h2>
+      
+    </header>
+    <p>Why is replication important? In distributed systems, availability is a primary concern. For data to be available to clients, we need redundancy. So if a copy of data is maintained on multiple nodes. More nodes can serve reads if there are failures, or if a single node is not able to handle the load.</p>
 <h2>Leaders and Followers</h2>
 <p>The most common type of replication is the leader-based replication. All writes go via one leader and are copied to replicas. The client connects with the leader for all writes. Reads can happen from other nodes. The data can be made available on replicas either synchronously or asynchronously. In the sync scenario, the writes are committed only when they have been copied to all the replicas. This is not performant, since copying writes to all replicas may take forever. In the async replication, write can be committed as long as the leader sees it. In async replication, durability is traded off for speed. If a new follower joins the cluster, it must get all the writes from the leader. This is achieved by maintaining snapshots of data on the leader. All writes post the snapshot creation need to be synced differently. One way of doing this could be to execute all statements since the snapshot. This is not ideal, since some statements are temporal, like select current_time() etc. Another way of achieving this is to read the database log. This can either be the WAL of the database. But those are binary, so results could differ across nodes. To improve on this, a logical replication log is maintained by databases which is used for replication in case of new nodes joining or handling node failures.</p>
 <h2>Problems with Replication Lag</h2>
@@ -46,37 +39,21 @@
 <p>Another philosophy is to have no leaders while replication happens. Each user can interact with different replicas and as long as the database can promise to be eventually consistent, there is no problem. However, the story is never simple in software and there are many caveats. Dynamo database popularized this philosophy amongst databases. The core idea is to have separate read quorum and write quorum. If there are n nodes and r and w define the read quorum and write quorum, guarantees can be made depending on the relationship between r+w and n. </p>
 <p>Here, “r” is the number of replicas where an update has been replicated to be read, and “w” is the number of replicas where a write has been committed. However, even when r+w &gt; n, there are limitations. Like in the case of sloppy quorum where the set r and the set w are completely disjoint. What happens to concurrent writes? These questions are not answered well so any consistency guarantee needs to be questioned. 
 Concurrent writes are hard to detect. Writes that may not be happening at the same exact time may also be concurrent. Two writes which are not aware of each other may be understood as concurrent. To converge to a consistent state, the database needs to adopt a strategy. A commonly used approach is Last Write Wins, also called LWW. This may provide consistency but can come at the cost of durability. “Happens before relationship” between two write events need to be established, to resolve conflicts or to converge to a consistent state. An algorithm that assigns version numbers to writes can be adopted to achieve this. Version vector is the name of the family of algorithms in use to solve this.</p>
-      </div><!-- /.entry-content -->
-
-    </article>
-  </section>
-                <section id="extras" class="body">
-                                <div class="blogroll">
-                                        <h2>links</h2>
-                                        <ul>
-                                                        <li><a href="https://getpelican.com/">Pelican</a></li>
-                                                        <li><a href="https://www.python.org/">Python.org</a></li>
-                                                        <li><a href="https://palletsprojects.com/p/jinja/">Jinja2</a></li>
-                                                        <li><a href="#">You can modify those links in your config file</a></li>
-                                        </ul>
-                                </div><!-- /.blogroll -->
-                                <div class="social">
-                                        <h2>social</h2>
-                                        <ul>
-
-                                                        <li><a href="#">You can add links in your config file</a></li>
-                                                        <li><a href="#">Another social link</a></li>
-                                        </ul>
-                                </div><!-- /.social -->
-                </section><!-- /#extras -->
-
-                <footer id="contentinfo" class="body">
-                        <address id="about" class="vcard body">
-                                Proudly powered by <a rel="nofollow" href="https://getpelican.com/">Pelican</a>, which takes great advantage of <a rel="nofollow" href="https://www.python.org/">Python</a>.
-                        </address><!-- /#about -->
-
-                        <p>The theme is by <a rel="nofollow" href="https://www.smashingmagazine.com/2009/08/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
-                </footer><!-- /#contentinfo -->
-
-        </body>
+    <footer>
+      <p>Published: <time datetime="2024-12-26T00:00:00+05:30">
+        Thu 26 December 2024
+      </time></p>
+        <p>
+          Category: <a href="localhost/category/notes.html">notes</a>
+        </p>
+    </footer>
+  </article>
+    </main>
+    <footer>
+      <address>
+        Proudly powered by <a rel="nofollow" href="https://getpelican.com/">Pelican</a>,
+        which takes great advantage of <a rel="nofollow" href="https://www.python.org/">Python</a>.
+      </address>
+    </footer>
+  </body>
 </html>

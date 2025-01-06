@@ -1,12 +1,15 @@
-AUTHOR = 'anshul'
+# AUTHOR = 'anshul'
 SITENAME = 'blog'
-SITEURL = "https://www.nmshr.in"
-
+SITEURL = ""
+THEME = "simpletheme"
 PATH = "content"
-
+STYLESHEET_URL = "/theme/css/main.css"
 TIMEZONE = 'Asia/Calcutta'
-
 DEFAULT_LANG = 'en'
+
+
+# Overrides some default settings
+DISPLAY_PAGES_ON_MENU = False
 
 # Feed generation is usually not desired when developing
 FEED_ALL_ATOM = None

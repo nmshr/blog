@@ -1,6 +1,7 @@
 Title: replication
 Date: 2024-12-26
 Category: notes
+Status: hidden
 
 
 Why is replication important? In distributed systems, availability is a primary concern. For data to be available to clients, we need redundancy. So if a copy of data is maintained on multiple nodes. More nodes can serve reads if there are failures, or if a single node is not able to handle the load.
