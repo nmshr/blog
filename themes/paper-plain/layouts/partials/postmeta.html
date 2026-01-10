@@ -1,0 +1,19 @@
+{{ if eq .Type "posts" }}
+  <div class="post-meta">
+    <time datetime="{{ .Date.Format "2006-01-02" }}">
+      {{ .Date.Format "Jan 2, 2006" }}
+    </time>
+    {{ if gt .ReadingTime 0 }}
+      <span>&middot; {{ .ReadingTime }} min read</span>
+    {{ end }}
+    {{ $tags := .GetTerms "tags" }}
+    {{ if $tags }}
+      <span>&middot;</span>
+      <span>
+        {{ range $index, $tag := $tags }}
+          {{ if $index }}, {{ end }}<a href="{{ $tag.RelPermalink }}">{{ $tag.LinkTitle }}</a>
+        {{ end }}
+      </span>
+    {{ end }}
+  </div>
+{{ end }}

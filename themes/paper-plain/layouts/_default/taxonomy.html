@@ -1,0 +1,18 @@
+{{ define "main" }}
+  <header class="list-header">
+    <h1>{{ .Title }}</h1>
+  </header>
+  <div class="post-list">
+    {{ range .Pages }}
+      <article class="post-item">
+        <h2><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
+        {{ partial "postmeta.html" . }}
+        {{ with .Summary }}
+          <p>{{ . }}</p>
+        {{ end }}
+      </article>
+    {{ else }}
+      <p>No posts yet.</p>
+    {{ end }}
+  </div>
+{{ end }}

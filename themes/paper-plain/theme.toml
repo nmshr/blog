@@ -1,0 +1,5 @@
+name = "paper-plain"
+license = "MIT"
+licenselink = "https://opensource.org/licenses/MIT"
+description = "Minimal, text-first Hugo theme."
+min_version = "0.111.0"

@@ -1,0 +1,25 @@
+{{ define "main" }}
+  {{ $about := .Site.GetPage "page" "about" }}
+  {{ with $about }}
+    <section class="post">
+      <div class="post-body">
+        {{ .Content }}
+      </div>
+    </section>
+  {{ end }}
+
+  <section class="post-list">
+    {{ $posts := where .Site.RegularPages "Type" "posts" }}
+    {{ range $posts.ByDate.Reverse }}
+      <article class="post-item">
+        <h2><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
+        {{ partial "postmeta.html" . }}
+        {{ with .Summary }}
+          <p>{{ . }}</p>
+        {{ end }}
+      </article>
+    {{ else }}
+      <p>No posts yet.</p>
+    {{ end }}
+  </section>
+{{ end }}

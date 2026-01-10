@@ -1,0 +1,23 @@
+baseURL = ""
+languageCode = "en-us"
+title = "Anshul Mishra"
+timezone = "Asia/Calcutta"
+theme = "paper-plain"
+
+[params]
+  author = "anshul"
+  description = "Software engineer working on data systems"
+
+[menu]
+  [[menu.main]]
+    identifier = "Blog"
+    name = "Blog"
+    url = "/posts/"
+    weight = 10
+
+[markup]
+  [markup.highlight]
+    style = "pygments"
+
+[pagination]
+  pagerSize = 10
