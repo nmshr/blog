@@ -1,4 +1,4 @@
-baseURL = ""
+baseURL = "https://nmshr.github.io/blog/"
 languageCode = "en-us"
 title = "Anshul Mishra"
 timezone = "Asia/Calcutta"
@@ -10,8 +10,8 @@ theme = "paper-plain"
 
 [menu]
   [[menu.main]]
-    identifier = "Blog"
-    name = "Blog"
+    identifier = "posts"
+    name = "Posts"
     url = "/posts/"
     weight = 10
 
